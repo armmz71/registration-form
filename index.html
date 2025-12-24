@@ -173,11 +173,19 @@
             accountNumber: accountNumber
         };
         
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', WEB_APP_URL, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
+        submitBtn.disabled = true;
+        loading.classList.add('show');
+        successMessage.classList.remove('show');
         
-        xhr.onload = function() {
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(function() {
             loading.classList.remove('show');
             successMessage.classList.add('show');
             form.reset();
@@ -186,15 +194,12 @@
             setTimeout(function() {
                 successMessage.classList.remove('show');
             }, 10000);
-        };
-        
-        xhr.onerror = function() {
+        })
+        .catch(function(error) {
             loading.classList.remove('show');
-            alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+            alert('เกิดข้อผิดพลาด: ' + error.message);
             submitBtn.disabled = false;
-        };
-        
-        xhr.send(JSON.stringify(data));
+        });
         
         return false;
     }
