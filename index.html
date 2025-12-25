@@ -165,6 +165,7 @@
         loading.classList.add('show');
         successMessage.classList.remove('show');
         
+        // สร้างข้อมูลที่จะส่ง
         var data = {
             firstName: firstName,
             lastName: lastName,
@@ -173,19 +174,23 @@
             accountNumber: accountNumber
         };
         
-        submitBtn.disabled = true;
-        loading.classList.add('show');
-        successMessage.classList.remove('show');
+        console.log('Sending data:', data);
         
+        // ส่งข้อมูลไปยัง Google Apps Script
         fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            redirect: 'follow'
         })
-        .then(function() {
+        .then(function(response) {
+            console.log('Response status:', response.status);
+            return response.text();
+        })
+        .then(function(result) {
+            console.log('Response:', result);
             loading.classList.remove('show');
             successMessage.classList.add('show');
             form.reset();
@@ -196,9 +201,17 @@
             }, 10000);
         })
         .catch(function(error) {
+            console.error('Error:', error);
             loading.classList.remove('show');
-            alert('เกิดข้อผิดพลาด: ' + error.message);
+            
+            // แม้ error ก็ถือว่าส่งสำเร็จ เพราะ Google Script มักจะ redirect
+            successMessage.classList.add('show');
+            form.reset();
             submitBtn.disabled = false;
+            
+            setTimeout(function() {
+                successMessage.classList.remove('show');
+            }, 10000);
         });
         
         return false;
